@@ -1,0 +1,5 @@
+# Caddy obtiene y renueva el certificado HTTPS automáticamente.
+{$DOMAIN}, www.{$DOMAIN} {
+    encode gzip zstd
+    reverse_proxy web:80
+}

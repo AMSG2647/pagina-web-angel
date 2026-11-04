@@ -1,0 +1,6 @@
+# Agrega este bloque al Caddyfile que ya usa tu servidor y recarga Caddy.
+# Caddy obtiene y renueva el certificado HTTPS de Let's Encrypt automáticamente.
+developerangel.dev, www.developerangel.dev {
+    encode gzip zstd
+    reverse_proxy 127.0.0.1:8080
+}

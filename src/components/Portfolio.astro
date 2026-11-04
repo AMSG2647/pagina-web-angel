@@ -1,0 +1,384 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { t, profile, skills, topSkills, levelLabel, type Lang } from '../data/content';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const c = t[lang];
+const label = (v: string | { es: string; en: string }) => (typeof v === 'string' ? v : v[lang]);
+const year = new Date().getFullYear();
+
+const navLinks = [
+  ['#skills', c.nav.skills],
+  ['#projects', c.nav.projects],
+  ['#experience', c.nav.experience],
+  ['#about', c.nav.about],
+  ['#contact', c.nav.contact],
+] as const;
+
+// Etiquetas extra (las que no están en las habilidades principales)
+const topNames = new Set(['PHP', 'Laravel', 'MySQL', 'JavaScript', 'React.js', 'PostgreSQL', 'Git', 'Claude', 'Claude Code', 'Docker', 'Next.js', 'Linux', 'Nginx', 'AWS']);
+const moreSkills = [...new Set(skills.flatMap((g) => g.items.map(label)))].filter((s) => !topNames.has(s));
+
+const levelStyle = {
+  expert: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
+  advanced: 'bg-sky-50 text-sky-700 ring-sky-600/20',
+  intermediate: 'bg-amber-50 text-amber-700 ring-amber-600/20',
+} as const;
+
+const sectionTitle = 'font-display text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl';
+const card = 'rounded-2xl border border-stone-200/80 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
+---
+
+<Layout title={c.meta.title} description={c.meta.description} lang={lang}>
+  <!-- Fondo animado -->
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="blob blob-1 absolute -top-40 left-[5%] h-[34rem] w-[34rem] rounded-full bg-sky-400/40 blur-3xl"></div>
+    <div class="blob blob-2 absolute top-[10%] right-[-5%] h-[30rem] w-[30rem] rounded-full bg-indigo-300/35 blur-3xl"></div>
+    <div class="blob blob-3 absolute bottom-[-10%] left-[30%] h-[28rem] w-[28rem] rounded-full bg-cyan-200/55 blur-3xl"></div>
+    <div class="blob blob-4 absolute top-[45%] left-[-10%] h-[24rem] w-[24rem] rounded-full bg-blue-200/50 blur-3xl"></div>
+    <div class="dot-grid absolute inset-0"></div>
+  </div>
+  <div id="cursor-glow" class="cursor-glow" aria-hidden="true"></div>
+
+  <!-- Navegación flotante -->
+  <header class="fixed inset-x-0 top-3 z-50 px-3">
+    <nav class="mx-auto flex h-14 max-w-5xl items-center justify-between liquid-glass rounded-full pr-2 pl-5">
+      <a href={lang === 'es' ? '/' : '/en/'} class="font-mono text-base font-semibold text-stone-900">
+        <span class="gradient-text">&lt;</span>angel<span class="gradient-text">.</span>dev <span class="gradient-text">/&gt;</span>
+      </a>
+      <div class="flex items-center gap-1">
+        <ul class="hidden items-center md:flex">
+          {navLinks.map(([href, text]) => (
+            <li>
+              <a href={href} class="rounded-full px-3 py-2 text-sm text-stone-600 transition hover:bg-stone-100 hover:text-stone-900">{text}</a>
+            </li>
+          ))}
+        </ul>
+        <a
+          href={c.langSwitch.href}
+          hreflang={lang === 'es' ? 'en' : 'es'}
+          class="rounded-full border border-stone-200 px-3 py-1.5 font-mono text-xs font-medium text-stone-600 transition hover:border-stone-300 hover:text-stone-900"
+        >
+          {c.langSwitch.label}
+        </a>
+        <a href="#contact" class="ml-1 hidden rounded-full bg-gradient-to-r from-sky-500 to-violet-500 px-4 py-2 text-sm font-medium text-white shadow-md shadow-sky-500/20 transition hover:opacity-90 sm:inline-block">
+          {c.hero.cta2}
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 sm:px-6">
+    <!-- Hero -->
+    <section class="grid items-center gap-12 pt-32 pb-16 sm:pt-40 lg:grid-cols-[1.25fr_1fr]">
+      <div class="reveal">
+        <span class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-medium text-emerald-700 shadow-sm">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+          </span>
+          {c.hero.badge}
+        </span>
+        <h1 class="font-display mt-6 text-5xl leading-[1.05] font-extrabold tracking-tight text-stone-900 sm:text-7xl">
+          {profile.name}
+        </h1>
+        <p class="font-display mt-3 text-2xl font-semibold sm:text-3xl">
+          <span class="gradient-text">{c.hero.role}</span>
+        </p>
+        <p class="mt-5 max-w-xl text-lg leading-relaxed text-stone-600">{c.hero.tagline}</p>
+        <p class="mt-4 flex items-center gap-2 text-sm text-stone-500">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          {c.hero.location}
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href={profile.cv} download class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 to-violet-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/25 transition hover:opacity-90">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+            {c.hero.cta1}
+          </a>
+          <a href="#contact" class="rounded-full border border-stone-300 bg-white px-5 py-3 text-sm font-semibold text-stone-900 transition hover:border-stone-400">
+            {c.hero.cta2}
+          </a>
+          <a href={profile.linkedin} target="_blank" rel="noopener" aria-label="LinkedIn" class="rounded-full border border-stone-300 bg-white p-3 text-stone-600 transition hover:text-[#0a66c2]">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 110-4.13 2.06 2.06 0 010 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+          </a>
+          <a href={profile.github} target="_blank" rel="noopener" aria-label="GitHub" class="rounded-full border border-stone-300 bg-white p-3 text-stone-600 transition hover:text-stone-900">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 016 0C17.3 4.7 18.3 5 18.3 5c.7 1.6.2 2.9.1 3.2.8.8 1.3 1.9 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .3"/></svg>
+          </a>
+          <a
+            href={`https://wa.me/${profile.whatsapp}?text=${encodeURIComponent(c.contact.whatsappMsg)}`}
+            target="_blank"
+            rel="noopener"
+            aria-label="WhatsApp"
+            class="rounded-full border border-stone-300 bg-white p-3 text-stone-600 transition hover:border-[#25D366] hover:text-[#25D366]"
+          >
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35zM12.05 21.5h-.01a9.4 9.4 0 01-4.8-1.31l-.34-.2-3.57.94.95-3.48-.22-.36a9.38 9.38 0 01-1.44-5.01c0-5.19 4.23-9.42 9.43-9.42 2.52 0 4.88.98 6.66 2.76a9.36 9.36 0 012.76 6.67c0 5.19-4.23 9.41-9.42 9.41zm8.02-17.43A11.27 11.27 0 0012.05.75C5.8.75.72 5.83.72 12.08c0 2 .52 3.95 1.52 5.66L.62 23.25l5.64-1.48a11.3 11.3 0 005.79 1.47h.01c6.24 0 11.33-5.08 11.33-11.33 0-3.03-1.18-5.87-3.32-8.01z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Tarjeta de código -->
+      <div class="reveal hidden lg:block">
+        <div class="rotate-1 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl shadow-sky-900/5">
+          <div class="flex items-center gap-1.5 border-b border-stone-100 bg-stone-50 px-4 py-3">
+            <span class="h-3 w-3 rounded-full bg-red-300"></span>
+            <span class="h-3 w-3 rounded-full bg-amber-300"></span>
+            <span class="h-3 w-3 rounded-full bg-emerald-300"></span>
+            <span class="ml-3 font-mono text-xs text-stone-400">angel.ts</span>
+          </div>
+          <pre class="p-5 font-mono text-[13px] leading-6 text-stone-700"><span class="text-violet-600">const</span> <span class="text-sky-600">angel</span> = {"{"}
+  role: <span class="text-emerald-600">'Full Stack Dev'</span>,
+  backend: [<span class="text-emerald-600">'PHP'</span>, <span class="text-emerald-600">'Laravel'</span>],
+  frontend: [<span class="text-emerald-600">'React'</span>, <span class="text-emerald-600">'Next.js'</span>],
+  db: [<span class="text-emerald-600">'MySQL'</span>, <span class="text-emerald-600">'PostgreSQL'</span>],
+  years: <span class="text-amber-600">7</span>,
+  openToWork: <span class="text-violet-600">true</span>,
+{"}"};</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Estadísticas -->
+    <dl class="reveal grid grid-cols-3 gap-3 sm:gap-4">
+      {c.stats.map((s) => (
+        <div class={`${card} p-4 sm:p-6`}>
+          <dt class="sr-only">{s.label}</dt>
+          <dd class="font-display text-3xl font-bold text-stone-900 sm:text-4xl">{s.value}</dd>
+          <dd class="mt-1 text-xs break-words hyphens-auto text-stone-500 sm:text-sm">{s.label}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <!-- Habilidades con nivel -->
+    <section id="skills" class="py-20">
+      <div class="reveal">
+        <h2 class={sectionTitle}>{c.skills.title}</h2>
+        <p class="mt-2 text-stone-500">{c.skills.subtitle}</p>
+      </div>
+      <div class="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {topSkills.map((s) => (
+          <div class={`reveal ${card} p-5 transition hover:-translate-y-0.5 hover:shadow-md`}>
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <h3 class="font-semibold text-stone-900">{s.name}</h3>
+                <p class="mt-0.5 text-sm text-stone-500">{c.skills.years(s.years)}</p>
+              </div>
+              <span class={`rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${levelStyle[s.level]}`}>
+                {levelLabel[lang][s.level]}
+              </span>
+            </div>
+            <div class="mt-4 h-1.5 overflow-hidden rounded-full bg-stone-100" role="meter" aria-valuenow={s.pct} aria-valuemin="0" aria-valuemax="100" aria-label={s.name}>
+              <div class="bar-fill h-full rounded-full" style={`width:${s.pct}%`}></div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div class="reveal mt-8">
+        <p class="text-sm font-medium text-stone-500">{c.skills.more}</p>
+        <ul class="mt-3 flex flex-wrap gap-2">
+          {moreSkills.map((s) => (
+            <li class="rounded-full border border-stone-200 bg-white px-3 py-1 text-sm text-stone-600">{s}</li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Proyectos -->
+    <section id="projects" class="py-20">
+      <div class="reveal">
+        <h2 class={sectionTitle}>{c.projects.title}</h2>
+        <p class="mt-2 text-stone-500">{c.projects.subtitle}</p>
+      </div>
+      <div class="mt-10 grid gap-5">
+        {c.projects.items.map((p, i) => (
+          <article class={`reveal ${card} p-6 transition hover:shadow-lg hover:shadow-sky-900/5 sm:p-8`}>
+            <div class="flex items-center gap-3">
+              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-violet-500 font-mono text-xs font-bold text-white">0{i + 1}</span>
+              <p class="font-mono text-xs tracking-wider text-stone-500 uppercase">{p.context}</p>
+            </div>
+            <h3 class="font-display mt-4 text-2xl font-bold text-stone-900">{p.name}</h3>
+            {p.images.length > 0 && (
+              <div class="mt-6 grid gap-4 md:grid-cols-[1.6fr_1fr] md:items-start">
+                {p.images.map((img, j) => (
+                  <button
+                    type="button"
+                    data-lightbox={img.src}
+                    data-alt={img.alt}
+                    class={`group/img overflow-hidden rounded-xl border border-stone-200 bg-stone-50 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:outline-none ${j === 1 ? 'md:mt-8' : ''}`}
+                    aria-label={img.alt}
+                  >
+                    <div class="flex items-center gap-1.5 border-b border-stone-200 bg-white px-3 py-2">
+                      <span class="h-2 w-2 rounded-full bg-red-300"></span>
+                      <span class="h-2 w-2 rounded-full bg-amber-300"></span>
+                      <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                    </div>
+                    <img
+                      src={img.src}
+                      alt={img.alt}
+                      width={img.w}
+                      height={img.h}
+                      loading="lazy"
+                      decoding="async"
+                      class="block h-auto w-full transition duration-500 group-hover/img:scale-[1.02]"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+            <div class="mt-6 grid gap-6 md:grid-cols-3">
+              <div>
+                <h4 class="text-sm font-semibold text-stone-900">{c.projects.problem}</h4>
+                <p class="mt-1 text-sm leading-relaxed text-stone-600">{p.problem}</p>
+              </div>
+              <div>
+                <h4 class="text-sm font-semibold text-stone-900">{c.projects.solution}</h4>
+                <p class="mt-1 text-sm leading-relaxed text-stone-600">{p.solution}</p>
+              </div>
+              <div class="rounded-xl bg-emerald-50 p-4">
+                <h4 class="text-sm font-semibold text-emerald-800">{c.projects.result}</h4>
+                <p class="mt-1 text-sm leading-relaxed text-emerald-900/80">{p.result}</p>
+              </div>
+            </div>
+            <ul class="mt-6 flex flex-wrap gap-2">
+              {p.stack.map((s) => (
+                <li class="rounded-full bg-sky-50 px-3 py-1 font-mono text-xs text-sky-700">{s}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <!-- Experiencia -->
+    <section id="experience" class="py-20">
+      <h2 class={`reveal ${sectionTitle}`}>{c.experience.title}</h2>
+      <ol class="relative mt-10 border-l-2 border-stone-200 pl-6 sm:pl-8">
+        {c.experience.items.map((e) => (
+          <li class="reveal relative pb-12 last:pb-0">
+            <span class="absolute top-1.5 -left-[33px] h-4 w-4 rounded-full border-4 border-[#fafaf9] bg-sky-500 sm:-left-[41px]"></span>
+            <p class="inline-block rounded-full bg-stone-100 px-2.5 py-0.5 font-mono text-xs text-stone-600">
+              {e.period[0]} — {e.period[1] ?? c.experience.present}
+            </p>
+            <h3 class="mt-2 text-lg font-semibold text-stone-900">{e.role}</h3>
+            <p class="text-sm font-medium text-sky-600">{e.company} <span class="font-normal text-stone-500">· {e.place}</span></p>
+            <ul class="mt-3 space-y-1.5 text-sm text-stone-600">
+              {e.points.map((pt) => (
+                <li class="flex gap-2"><span class="text-sky-500">→</span><span>{pt}</span></li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ol>
+
+      <div class="reveal mt-16">
+        <h3 class="font-display text-xl font-bold text-stone-900">{c.experience.education.title}</h3>
+        <div class="mt-4 grid gap-3 sm:grid-cols-2">
+          {c.experience.education.items.map((ed) => (
+            <div class={`${card} p-5`}>
+              <p class="font-mono text-xs text-stone-500">{ed.period}</p>
+              <p class="mt-1 font-semibold text-stone-900">{ed.name}</p>
+              <p class="text-sm text-stone-600">{ed.place}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Sobre mí -->
+    <section id="about" class="reveal py-20">
+      <h2 class={sectionTitle}>{c.about.title}</h2>
+      <div class="mt-8 max-w-3xl space-y-4 text-lg leading-relaxed text-stone-600">
+        {c.about.body.map((p) => <p>{p}</p>)}
+      </div>
+    </section>
+
+    <!-- Contacto -->
+    <section id="contact" class="reveal py-16">
+      <div class="relative">
+        <!-- Colores detrás del vidrio -->
+        <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+          <div class="blob blob-1 absolute top-[-10%] left-[5%] h-64 w-64 rounded-full bg-sky-400/50 blur-2xl"></div>
+          <div class="blob blob-2 absolute right-[5%] bottom-[-10%] h-72 w-72 rounded-full bg-violet-300/35 blur-2xl"></div>
+          <div class="blob blob-4 absolute top-[30%] left-[40%] h-48 w-48 rounded-full bg-cyan-300/40 blur-2xl"></div>
+        </div>
+        <div class="liquid-glass rounded-[2rem] px-6 py-16 text-center sm:px-12">
+          <div class="relative">
+            <h2 class="font-display text-3xl font-bold tracking-tight text-stone-900 sm:text-5xl">
+              <span class="gradient-text">{c.contact.title}</span>
+            </h2>
+            <p class="mx-auto mt-4 max-w-xl text-lg text-stone-700">{c.contact.body}</p>
+            <div class="mt-8 flex flex-wrap justify-center gap-3">
+              <a href={`mailto:${profile.email}`} class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 to-violet-500 px-6 py-3 font-semibold text-white shadow-lg shadow-sky-500/25 transition hover:opacity-90">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+                {c.contact.email}
+              </a>
+              <a
+                href={`https://wa.me/${profile.whatsapp}?text=${encodeURIComponent(c.contact.whatsappMsg)}`}
+                target="_blank"
+                rel="noopener"
+                class="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-6 py-3 font-semibold text-white shadow-lg shadow-green-600/15 transition hover:bg-[#1ebe5b]"
+              >
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35zM12.05 21.5h-.01a9.4 9.4 0 01-4.8-1.31l-.34-.2-3.57.94.95-3.48-.22-.36a9.38 9.38 0 01-1.44-5.01c0-5.19 4.23-9.42 9.43-9.42 2.52 0 4.88.98 6.66 2.76a9.36 9.36 0 012.76 6.67c0 5.19-4.23 9.41-9.42 9.41zm8.02-17.43A11.27 11.27 0 0012.05.75C5.8.75.72 5.83.72 12.08c0 2 .52 3.95 1.52 5.66L.62 23.25l5.64-1.48a11.3 11.3 0 005.79 1.47h.01c6.24 0 11.33-5.08 11.33-11.33 0-3.03-1.18-5.87-3.32-8.01z"/></svg>
+                WhatsApp
+              </a>
+              <a href={profile.linkedin} target="_blank" rel="noopener" class="glass-btn inline-flex items-center gap-2 rounded-full px-6 py-3 font-semibold text-stone-900 transition hover:text-[#0a66c2]">
+                LinkedIn
+              </a>
+            </div>
+            <p class="mt-6 font-mono text-sm text-stone-700">{profile.email} · {profile.phone}</p>
+            <p class="mt-1 text-sm text-stone-600">{c.contact.languages}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Visor de imágenes -->
+  <dialog id="lightbox" class="m-auto max-h-[92vh] max-w-[94vw] overflow-visible bg-transparent p-0 backdrop:bg-stone-900/70 backdrop:backdrop-blur-sm">
+    <form method="dialog">
+      <button class="absolute -top-11 right-0 rounded-full bg-white/90 px-3 py-1.5 text-sm font-medium text-stone-900 shadow" aria-label="Cerrar">✕</button>
+    </form>
+    <img id="lightbox-img" src="" alt="" class="max-h-[88vh] w-auto rounded-xl shadow-2xl" />
+  </dialog>
+
+  <script>
+    // Brillo que sigue al mouse (solo con mouse y sin "reducir movimiento")
+    const glow = document.getElementById('cursor-glow');
+    if (glow && matchMedia('(pointer: fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let x = innerWidth / 2, y = innerHeight / 3, tx = x, ty = y;
+      addEventListener('pointermove', (e) => {
+        tx = e.clientX;
+        ty = e.clientY;
+        glow.style.opacity = '1';
+      });
+      document.documentElement.addEventListener('pointerleave', () => (glow.style.opacity = '0'));
+      const tick = () => {
+        x += (tx - x) * 0.08;
+        y += (ty - y) * 0.08;
+        glow.style.transform = `translate(${x}px, ${y}px)`;
+        requestAnimationFrame(tick);
+      };
+      tick();
+    }
+
+    const dlg = document.getElementById('lightbox') as HTMLDialogElement;
+    const im = document.getElementById('lightbox-img') as HTMLImageElement;
+    document.querySelectorAll<HTMLButtonElement>('[data-lightbox]').forEach((b) => {
+      b.addEventListener('click', () => {
+        im.src = b.dataset.lightbox!;
+        im.alt = b.dataset.alt ?? '';
+        dlg.showModal();
+      });
+    });
+    dlg.addEventListener('click', (e) => {
+      if (e.target === dlg) dlg.close();
+    });
+  </script>
+
+  <footer class="py-10 text-center text-sm text-stone-500">
+    © {year} {profile.name}. {c.footer}
+  </footer>
+</Layout>

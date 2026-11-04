@@ -1,0 +1,10 @@
+# Variante para un servidor que YA tiene Caddy/Nginx en los puertos 80 y 443.
+# Levanta solo la web, accesible únicamente desde el propio servidor en el puerto 8080.
+services:
+  web:
+    build: .
+    image: angelweb:latest
+    container_name: angelweb
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
