@@ -11,6 +11,12 @@ html {
   scroll-padding-top: 5rem;
 }
 
+html,
+body {
+  /* Evita que las animaciones del fondo generen scroll horizontal */
+  overflow-x: clip;
+}
+
 body {
   background: #fafaf9;
   color: #44403c;
